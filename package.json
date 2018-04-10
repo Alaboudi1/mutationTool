@@ -1,0 +1,36 @@
+{
+  "name": "userstudy1",
+  "version": "1.0.0",
+  "description": "This is a study that examin the hyptheses building process",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --mode development --devtool eval-cheap-module-source-map --open --progress ",
+    "build": "webpack --mode production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "HCI"
+  ],
+  "author": "Abdulaziz",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "css-loader": "^0.28.11",
+    "file-loader": "^1.1.11",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.1.0",
+    "image-webpack-loader": "^4.2.0",
+    "style-loader": "^0.20.3",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
+  },
+  "dependencies": {
+    "bootstrap": "^4.0.0",
+    "firebase": "^4.12.1",
+    "monaco-editor": "^0.11.1"
+  }
+}

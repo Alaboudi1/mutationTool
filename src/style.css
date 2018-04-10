@@ -1,0 +1,88 @@
+.MutantIndicatorRed {
+  background: red;
+  border-radius: 10px;
+  margin-left: 13px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.MutantIndicatorOrange {
+  background: orange;
+  border-radius: 10px;
+  margin-left: 13px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.originalMutantLocationRed {
+  color: red !important;
+  font-weight: bold;
+}
+
+.originalMutantLocationOrange {
+  color: Orange !important;
+  font-weight: bold;
+}
+
+.MutantLocationRed {
+  color: red !important;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.MutantLocationOrange {
+  color: Orange !important;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.infection {
+  color: black !important;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.closeOrange:before,
+.closeOrange:after {
+  position: absolute;
+  left: 15px;
+  content: " ";
+  height: 23px;
+  width: 5px;
+  background-color: orange;
+  cursor: pointer;
+}
+.closeOrange:before {
+  transform: rotate(45deg);
+}
+.closeOrange:after {
+  transform: rotate(-45deg);
+}
+
+.closeRed:before,
+.closeRed:after {
+  position: absolute;
+  left: 15px;
+  content: " ";
+  height: 23px;
+  width: 5px;
+  background-color: red;
+  cursor: pointer;
+}
+.closeRed:before {
+  transform: rotate(45deg);
+}
+.closeRed:after {
+  transform: rotate(-45deg);
+}
+
+.diffMissed {
+  background: lightgrey;
+  width: 10px !important;
+  left: 10px;
+}
+.diffExtra {
+  background: gray;
+  width: 10px !important;
+  left: 10px;
+}

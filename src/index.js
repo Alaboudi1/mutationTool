@@ -1,7 +1,11 @@
 // @ts-check
 import * as monaco from "monaco-editor";
 import "./style.css";
-import * as mutantsProgram from "./mutants";
+import * as subject_1 from "./subject1";
+import * as subject_2 from "./subject2";
+
+let currentSubject, editor;
+
 //@ts-ignore
 self.MonacoEnvironment = {
   getWorkerUrl: (moduleId, label) => {
@@ -20,77 +24,45 @@ self.MonacoEnvironment = {
     return "./editor.worker.bundle.js";
   }
 };
-
-let state = initState();
-const mutants = [
-  {
-    lineNumber: 40,
-    column: { a: 19, b: 20 },
-    type: "Red",
-    id: 2,
-    mutationOperation: "Original: iSub = 0"
-  },
-  {
-    lineNumber: 12,
-    column: { a: 23, b: 25 },
-    type: "Orange",
-    id: 1,
-    mutationOperation: "Original: !="
-  }
-];
-const diffBetweenMutantAndOriginal = [
-  {
-    id: 1,
-    diffs: [{ lineNumber: { a: 13, b: 17 }, type: "Missed", message: "Missed by mutant" }]
-  },
-  {
-    id: 2,
-    diffs: [
-      { lineNumber: { a: 41, b: 43 }, type: "Missed", message: "Missed by mutant" },
-      { lineNumber: { a: 45, b: 50 }, type: "Extra", message: "Extra by mutant" }
-    ]
-  }
-];
-const infections = [
-  {
-    id: 1,
-    mutant: [
-      {
-        lineNumber: 15,
-        column: { a: 13, b: 17 },
-        type: "Orange"
-      }
-    ],
-    infected: [
-      // by assigning variable's value to mutants or involving mutant in constituting its value
-      {
-        lineNumber: 21,
-        column: { a: 23, b: 25 },
-      }
-    ]
-  }
-];
-let editor = monaco.editor.create(document.getElementById("container"), {
-  value: mutantsProgram.javaCode,
+document.getElementById("mutant").addEventListener("change", e => setSubject(e.target.value));
+editor = monaco.editor.create(document.getElementById("container"), {
+  value: "",
   language: "java",
   glyphMargin: true,
   contextmenu: false,
   minimap: { enabled: false }
 });
+const setSubject = subject => {
+  switch (subject) {
+    case "subject_1":
+      currentSubject = subject_1;
+      break;
+    case "subject_2":
+      currentSubject = subject_2;
+      break;
+    default:
+      currentSubject = { javaCode: "", mutants: [] };
+      break;
+  }
+  editor.setValue(currentSubject.javaCode);
+  initMutationLayout();
+  register();
+};
+let state = initState();
 
 const initMutationLayout = () =>
   editor.deltaDecorations(
     [],
     //@ts-ignore
-    mutants.map(mu => ({
-      range: new monaco.Range(mu.lineNumber, 1, mu.lineNumber, 1),
+    currentSubject.mutants.map(({ mutant }) => ({
+      range: new monaco.Range(mutant.lineNumber, 1, mutant.lineNumber, 1),
       options: {
-        glyphMarginClassName: `MutantIndicator${mu.type}`
+        glyphMarginClassName: `MutantIndicator${mutant.type}`
       }
     }))
   );
 const register = () => {
-  mutants.forEach(localMutant =>
+  currentSubject.mutants.forEach(localMutant =>
     monaco.languages.registerHoverProvider(
       "java",
       // @ts-ignore
@@ -115,7 +87,7 @@ const register = () => {
       }
     )
   );
-  diffBetweenMutantAndOriginal.forEach(({ diffs, id }) =>
+  currentSubject.mutants.forEach(({diffs, mutant: {id}}) =>
     diffs.forEach(diff =>
       monaco.languages.registerHoverProvider(
         "java",
@@ -142,69 +114,51 @@ const register = () => {
 editor.onMouseDown(e => {
   if (e.target.position.column != 1) return;
   if (state.underInspectionMutant.lineNumber === e.target.position.lineNumber) {
-    editor.setValue(mutantsProgram.javaCode);
+    editor.setValue(currentSubject.javaCode);
     state = initState();
     return initMutationLayout();
   }
-  const localMutant = mutants.find(mutant => mutant.lineNumber === e.target.position.lineNumber);
-  if (localMutant) {
+  const { mutant } = currentSubject.mutants.find(
+    m => m.mutant.lineNumber === e.target.position.lineNumber
+  );
+  if (mutant) {
     let decoration = [
       {
         range: new monaco.Range(
-          localMutant.lineNumber,
-          localMutant.column.a,
-          localMutant.lineNumber,
-          localMutant.column.b
+          mutant.lineNumber,
+          mutant.column.a,
+          mutant.lineNumber,
+          mutant.column.b
         ),
-        options: { inlineClassName: `originalMutantLocation${localMutant.type}` }
+        options: { inlineClassName: `originalMutantLocation${mutant.type}` }
       },
       {
-        range: new monaco.Range(localMutant.lineNumber, 1, localMutant.lineNumber, 1),
+        range: new monaco.Range(mutant.lineNumber, 1, mutant.lineNumber, 1),
         options: {
-          glyphMarginClassName: `close${localMutant.type}`
+          glyphMarginClassName: `close${mutant.type}`
         }
       }
     ];
-    const localDiff = diffBetweenMutantAndOriginal.find(diff => diff.id === localMutant.id);
-    const localInfection = infections.find(infected => infected.id === localMutant.id);
+    const localDiff = currentSubject.mutants[mutant.id].diffs;
+    const localInfection = currentSubject.mutants[mutant.id].infected;
     let diffDecoration = [];
     let InfectedDecoration = [];
-    let InfectionMutationDecoration = [];
     if (localDiff) {
-      diffDecoration = localDiff.diffs.map(diff => ({
+      diffDecoration = localDiff.map(diff => ({
         range: new monaco.Range(diff.lineNumber.a, 1, diff.lineNumber.b, 1),
         options: { linesDecorationsClassName: `diff${diff.type}` }
       }));
     }
+    InfectedDecoration = localInfection.map(inf => ({
+      range: new monaco.Range(inf.lineNumber, inf.column.a, inf.lineNumber, inf.column.b),
+      options: { inlineClassName: `infection` }
+    }));
 
-    if (localInfection) {
-      InfectionMutationDecoration = localInfection.mutant.map(mu => ({
-        range: new monaco.Range(mu.lineNumber, mu.column.a, mu.lineNumber, mu.column.b),
-        options: { inlineClassName: `MutantLocation${mu.type}` }
-      }));
-
-      InfectedDecoration = localInfection.infected.map(variable => ({
-        range: new monaco.Range(
-          variable.lineNumber,
-          variable.column.a,
-          variable.lineNumber,
-          variable.column.b
-        ),
-        options: { inlineClassName: `infection` }
-      }));
-    }
-
-    state.underInspectionMutant = localMutant;
-    editor.setValue(mutantsProgram[`mu${localMutant.id}`]);
-    editor.deltaDecorations(
-      [],
-      [...decoration, ...diffDecoration, ...InfectedDecoration, ...InfectionMutationDecoration]
-    );
+    state.underInspectionMutant = mutant;
+    editor.setValue(currentSubject.mutants[mutant.id].code);
+    editor.deltaDecorations([], [...decoration, ...diffDecoration, ...InfectedDecoration]);
   }
 });
-
-initMutationLayout();
-register();
 
 function initState() {
   return {

@@ -1,6 +1,6 @@
 export const mutants = [
   {
-code: `// Introduction to Software Testing
+    code: `// Introduction to Software Testing
 // Authors: Paul Ammann & Jeff Offutt
 // Chapter 1; page 13
 // Can be run from command line
@@ -39,6 +39,7 @@ public class LastZero
       column: { a: 18, b: 19 },
       type: "Red",
       id: 0,
+      subject: "subject_1",
       mutationOperation: "Original: i = 0"
     },
     infected: [
@@ -180,6 +181,7 @@ public class LastZero
       column: { a: 18, b: 20 },
       type: "Red",
       id: 1,
+      subject: "subject_1",
       mutationOperation: "Original: x[i] == 0"
     },
     infected: [],

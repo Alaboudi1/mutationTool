@@ -3,7 +3,9 @@ import * as monaco from "monaco-editor";
 import "./style.css";
 import * as subject_1 from "./subject1";
 import * as subject_2 from "./subject2";
-
+import * as subject_3 from "./subject3";
+import * as subject_4 from "./subject4";
+import * as subject_5 from "./subject5";
 let currentSubject, editor;
 
 //@ts-ignore
@@ -24,6 +26,7 @@ self.MonacoEnvironment = {
     return "./editor.worker.bundle.js";
   }
 };
+// @ts-ignore
 document.getElementById("mutant").addEventListener("change", e => setSubject(e.target.value));
 editor = monaco.editor.create(document.getElementById("container"), {
   value: "",
@@ -40,17 +43,25 @@ const setSubject = subject => {
     case "subject_2":
       currentSubject = subject_2;
       break;
+    case "subject_3":
+      currentSubject = subject_3;
+      break;
+      case "subject_4":
+      currentSubject = subject_4;
+      break;
+      case "subject_5":
+      currentSubject = subject_5;
+      break;
     default:
       currentSubject = { javaCode: "", mutants: [] };
       break;
   }
   editor.setValue(currentSubject.javaCode);
   initMutationLayout();
-  register();
 };
 let state = initState();
-
-const initMutationLayout = () =>
+let disHover;
+const initMutationLayout = () => {
   editor.deltaDecorations(
     [],
     //@ts-ignore
@@ -61,52 +72,65 @@ const initMutationLayout = () =>
       }
     }))
   );
+};
+
 const register = () => {
-  currentSubject.mutants.forEach(localMutant =>
-    monaco.languages.registerHoverProvider(
-      "java",
-      // @ts-ignore
-      {
-        provideHover: (model, position, cancel) => {
-          if (
-            state.underInspectionMutant.id == localMutant.id &&
-            localMutant.lineNumber === position.lineNumber &&
-            localMutant.column.a <= position.column &&
-            localMutant.column.b >= position.column
-          )
-            return {
-              range: new monaco.Range(
-                localMutant.lineNumber,
-                localMutant.column.a,
-                localMutant.lineNumber,
-                localMutant.column.b
-              ),
-              contents: ["", { language: "java", value: localMutant.mutationOperation }]
-            };
-        }
-      }
-    )
-  );
-  currentSubject.mutants.forEach(({diffs, mutant: {id}}) =>
-    diffs.forEach(diff =>
-      monaco.languages.registerHoverProvider(
-        "java",
-        // @ts-ignore
-        {
-          provideHover: (model, position, cancel) => {
-            if (
-              state.underInspectionMutant.id == id &&
-              diff.lineNumber.a <= position.lineNumber &&
-              diff.lineNumber.b >= position.lineNumber
-            ) {
-              editor.setSelection(new monaco.Range(diff.lineNumber.a, 1, diff.lineNumber.b, 100));
-              return {
-                range: new monaco.Range(diff.lineNumber.a, 1, diff.lineNumber.b, 100),
-                contents: [{ language: "java", value: diff.message }]
-              };
+  if (disHover) {
+    console.log(disHover.dispose());
+  }
+  [subject_1, subject_2, subject_3, subject_4, subject_5].forEach(({ mutants }) =>
+    // @ts-ignore
+    mutants.forEach(
+      ({ mutant }) =>
+        (disHover = monaco.languages.registerHoverProvider(
+          "java",
+          // @ts-ignore
+          {
+            provideHover: (model, position, cancel) => {
+              if (
+                state.underInspectionMutant.subject == mutant.subject &&
+                state.underInspectionMutant.id == mutant.id &&
+                mutant.lineNumber === position.lineNumber &&
+                mutant.column.a <= position.column &&
+                mutant.column.b >= position.column
+              )
+                return {
+                  range: new monaco.Range(
+                    mutant.lineNumber,
+                    mutant.column.a,
+                    mutant.lineNumber,
+                    mutant.column.b
+                  ),
+                  contents: ["", { language: "java", value: mutant.mutationOperation }]
+                };
             }
           }
-        }
+        ))
+    )
+  );
+  [subject_1, subject_2, subject_3, subject_4, subject_5].forEach(({ mutants }) =>
+    // @ts-ignore
+    mutants.forEach(({ diffs, mutant: { id } }) =>
+      diffs.forEach(diff =>
+        monaco.languages.registerHoverProvider(
+          "java",
+          // @ts-ignore
+          {
+            provideHover: (model, position, cancel) => {
+              if (
+                state.underInspectionMutant.id == id &&
+                diff.lineNumber.a <= position.lineNumber &&
+                diff.lineNumber.b >= position.lineNumber
+              ) {
+                editor.setSelection(new monaco.Range(diff.lineNumber.a, 1, diff.lineNumber.b, 100));
+                return {
+                  range: new monaco.Range(diff.lineNumber.a, 1, diff.lineNumber.b, 50),
+                  contents: [{ language: "java", value: diff.message }]
+                };
+              }
+            }
+          }
+        )
       )
     )
   );
@@ -166,11 +190,14 @@ function initState() {
       lineNumber: 0,
       column: { a: 0, b: 0 },
       type: "",
-      id: 0,
-      mutationOperation: ""
+      id: -1,
+      mutationOperation: "",
+      subject: ""
     }
   };
 }
+register();
+
 // Ideas
 // 1. having colors for the circle for the mutants that diverge in the behavior
 // 2. for those in which their behaviors do not diverge, make a map between the input that interact with the mutants, help the developer to create the diversion.

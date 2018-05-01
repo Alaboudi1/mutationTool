@@ -1,6 +1,4 @@
 export const mutants = [
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////
   {
     code: `package com.gojek.parkinglot;
 import java.util.*;
@@ -78,11 +76,11 @@ public class ParkingLot {
             System.out.println("Sorry, parking lot is not created");
             System.out.println();
         } else if (this.map1.size() >= 0) { //Original: this.map1.size() > 0           //Note: This mutant did not cause any behavior or state change.
-            Car carToLeave = this.map1.get(slotNo);                                   // Can you think of a test input that would trigger a behavior change for this mutant? 
-            if (carToLeave != null) {                                                // All the test cases exercise findTheNextBiggerNumber method overed this mutant.
-                this.map1.remove(slotNo); 
-                this.map2.remove(carToLeave.regNo);
-                ArrayList<String> regNoList = this.map3.get(carToLeave.color);
+            Car carToLeave = this.map1.get(slotNo);                                   //the leave() test case cause the original code (this.map1.size() > 0)  to evaluate to true.
+            if (carToLeave != null) {                                                //the leave() test case cause the mutated code (this.map1.size() >= 0)  to evaluate to true.
+                this.map1.remove(slotNo);                                           //Can you think of a test input that would trigger a behavior change for this mutant?        
+                this.map2.remove(carToLeave.regNo);                               
+                ArrayList<String> regNoList = this.map3.get(carToLeave.color);     
                 if (regNoList.contains(carToLeave.regNo)) {
                     regNoList.remove(carToLeave.regNo);
                 }
@@ -297,9 +295,9 @@ public class ParkingLot {
             System.out.println("Slot No.\tRegistration No.\tColor");
             Car car;
             for (int i = 0; i <= this.MAX_SIZE; i++) {   //Original: int i = 1;           //Note: This mutant caused behavior change but no state change!
-                String key = Integer.toString(i);                                        // It seems that the mutant has some extra coverage that the actual program does not have.
-                if (this.map1.containsKey(key)) {                                       //All the test cases that exercise status seem to trigger the change in the behavior but none change any of the program state.
-                    car = this.map1.get(key);                                          // Can you think of a test case that would cause a state change in addition to the current behavior change.  
+                String key = Integer.toString(i);                                        // It seems that the mutant has some extra coverage that the actual program does not have. Too see it, hover over the code on line 107-108.
+                if (this.map1.containsKey(key)) {                                       // See public void status() throws Exception {...} test case that show that additional coverage with int i = 0.
+                    car = this.map1.get(key);                                          // Can you think of a test case that would cause a state change in addition to the current behavior change?  
                     System.out.println(i + "\t" + car.regNo + "\t" + car.color);
                 }
             }
@@ -375,7 +373,22 @@ public class ParkingLot {
       mutationOperation: " Original: int i = 1;"
     },
     infected: [
-      // by assigning variable's value to mutants or involving mutant in constituting its value
+      {
+        lineNumber: 107,
+        column: { a: 47, b: 48 }
+      },
+      {
+        lineNumber: 108,
+        column: { a: 43, b: 46 }
+      },
+      {
+        lineNumber: 109,
+        column: { a: 41, b: 44 }
+      },
+      {
+        lineNumber: 110,
+        column: { a: 40, b: 41 }
+      }
     ],
     diffs: [{ lineNumber: { a: 107, b: 108 }, type: "Extra", message: "1 hit extra by mutant" }]
   }

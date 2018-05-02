@@ -6,6 +6,11 @@ import * as subject_2 from "./subject2";
 import * as subject_3 from "./subject3";
 import * as subject_4 from "./subject4";
 import * as subject_5 from "./subject5";
+import * as subject_2C from "./subject2C";
+import * as subject_3C from "./subject3C";
+import * as subject_4C from "./subject4C";
+import * as subject_5C from "./subject5C";
+
 let currentSubject, editor;
 
 //@ts-ignore
@@ -46,18 +51,30 @@ const setSubject = subject => {
     case "subject_3":
       currentSubject = subject_3;
       break;
-      case "subject_4":
+    case "subject_4":
       currentSubject = subject_4;
       break;
-      case "subject_5":
+    case "subject_5":
       currentSubject = subject_5;
+      break;
+    case "subject_2C":
+      currentSubject = subject_2C;
+      break;
+    case "subject_3C":
+      currentSubject = subject_3C;
+      break;
+    case "subject_4C":
+      currentSubject = subject_4C;
+      break;
+    case "subject_5C":
+      currentSubject = subject_5C;
       break;
     default:
       currentSubject = { javaCode: "", mutants: [] };
       break;
   }
   editor.setValue(currentSubject.javaCode);
-  initMutationLayout();
+  if (subject.indexOf("C") == -1) initMutationLayout();
 };
 let state = initState();
 let disHover;
